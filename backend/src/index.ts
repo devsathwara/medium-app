@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client/edge'
 import { decode, sign, verify } from 'hono/jwt'
 import { withAccelerate } from '@prisma/extension-accelerate'
 import { createPostInput, signupInput,signinInput, updatePostInput } from 'zod-module'
+import { cors } from 'hono/cors'
 const app = new Hono<{
 	Bindings: {
 		DATABASE_URL: string,
@@ -13,7 +14,7 @@ const app = new Hono<{
     useremail:string
   }
 }>()
-
+app.use(cors())
 app.use("/api/v1/blog/*", async (c, next) => {
   const jwt = c.req.header("Authorization");
   if(!jwt){
