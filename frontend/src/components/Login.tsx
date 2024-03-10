@@ -16,7 +16,7 @@ export const Login = () => {
         }).then(res=>{
           console.log("Successfully registered");
           setCookie('jwt', "Bearer "+ res.data.token, { path: '/', maxAge: 86400 })
-          window.location.href = '/blog/1';
+          window.location.href = '/home';
             console.log(res.data);
         }).catch(err=>{
             console.log(err);

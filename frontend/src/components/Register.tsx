@@ -16,12 +16,19 @@ export const Register = () => {
             password:password.current!.value,
             name:name.current!.value
         }).then(res=>{
-          console.log("Successfully registered");
-          setCookie('jwt', "Bearer "+ res.data.token, { path: '/', maxAge: 86400 })
-          window.location.href = '/signin';
-            console.log(res.data);
+          if(res.data.success == false && res.data.message === "Email exists") {
+            alert("You are already Registered Please Login");
+            window.location.href = '/signin';
+          }
+          else{
+
+            console.log("Successfully registered");
+            setCookie('jwt', "Bearer "+ res.data.token, { path: '/', maxAge: 86400 })
+            window.location.href = '/home';
+              console.log(res.data);
+          }
         }).catch(err=>{
-            console.log(err);
+         console.log(err)
         }
         )
   };

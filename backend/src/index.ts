@@ -21,8 +21,9 @@ app.use("/api/v1/blog/*", async (c, next) => {
     c.status(401);
     return c.json({message:"Not authenticated"});
   }
-  const token = jwt.split(' ')[1];
-  const payload = await verify(token, c.env.JWT_SECRET);
+  const token = jwt.split(',');
+  console.log(token)
+  const payload = await verify(token[1], c.env.JWT_SECRET);
   if (!payload) {
 		c.status(401);
 		return c.json({ error: "unauthorized" });
@@ -42,7 +43,14 @@ app.post('/api/v1/signup', async(c) => {
 		c.status(400);
 		return c.json({ error: "invalid input" });
 	}
-    const body = await c.req.json();
+    const userExist = await prisma.user.findUnique({
+      where: {
+        email: email
+      }
+    });
+    if (userExist) {
+      return c.json({success: false, message: 'Email exists'});
+    }
     try {
       const user = await prisma.user.create({
         data: {
@@ -87,12 +95,13 @@ app.post('/api/v1/signin', async(c) => {
 })
 
 app.post("/api/v1/blog", async (c) => {
-  const userId = c.get("userId");
-  const useremail = c.get("useremail");
+  // const userId = c.get("userId");
+  // const useremail = c.get("useremail");
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
   const body = await c.req.json();
+  console.log(body)
   const { success } = createPostInput.safeParse(body);
 	if (!success) {
 		c.status(400);
@@ -103,7 +112,7 @@ app.post("/api/v1/blog", async (c) => {
     data: {
       title: body.title,
       content: body.content,
-      author: { connect: { id: userId } },
+      author: { connect: { id: body.author } },
     },
   });
   if (blog) {
@@ -159,7 +168,19 @@ app.get('/api/v1/blog', async(c) => {
       }
     }
   });
+  if(!posts){
+   c.status(401);
+   return c.json({
+      success:false
+    })
+  }
   return c.json({success:true,posts:posts})
 })
-
+app.get('/api/v1/allBlogs', async(c) => {
+  const prisma = new PrismaClient({
+		datasourceUrl: c.env.DATABASE_URL	,
+	}).$extends(withAccelerate());
+  const posts = await prisma.post.findMany();
+  return c.json({success:true,posts:posts})
+})
 export default app
