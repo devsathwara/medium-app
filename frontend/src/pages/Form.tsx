@@ -24,10 +24,9 @@ export const Form = () => {
           alert("Successfully Posted");
           window.location.href = "/home";
         }
-        console.log(res.data);
       })
       .catch((err) => {
-        console.log(err);
+        alert("Error while posting");
       });
   };
   return (

@@ -166,6 +166,9 @@ app.get('/api/v1/blog', async(c) => {
       author: {
         id: userId
       }
+    },
+    include: {
+      author: true
     }
   });
   if(!posts){
@@ -174,13 +177,19 @@ app.get('/api/v1/blog', async(c) => {
       success:false
     })
   }
+  console.log(posts)
   return c.json({success:true,posts:posts})
 })
-app.get('/api/v1/allBlogs', async(c) => {
+app.get("/api/v1/allBlogs", async (c) => {
   const prisma = new PrismaClient({
-		datasourceUrl: c.env.DATABASE_URL	,
-	}).$extends(withAccelerate());
-  const posts = await prisma.post.findMany();
-  return c.json({success:true,posts:posts})
-})
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate());
+  const posts = await prisma.post.findMany({
+    include: {
+      author: true,
+    },
+  });
+  console.log(posts)
+  return c.json({ success: true, posts: posts });
+});
 export default app
